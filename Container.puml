@@ -1,0 +1,28 @@
+@startuml
+!define RECTANGLE_RECT rectangle
+!define RECTANGLE_DATABASE database
+!define RECTANGLE_QUEUE queue
+
+title C4 Container Diagram - Data Processing Application
+
+actor User as u
+
+package "Data Processing System" {
+    
+    RECTANGLE_RECT ".NET Console Application" as App {
+        RECTANGLE_RECT "CSV Reader" as Reader
+        RECTANGLE_RECT "Data Processor" as Processor
+        RECTANGLE_RECT "Logger" as Log
+    }
+
+    RECTANGLE_DATABASE "Database" as DB
+    RECTANGLE_QUEUE "Message Queue" as Queue
+}
+
+u --> App : Starts Application
+App --> Reader : Reads data from CSV file
+App --> Processor : Processes data in blocks\nusing multithreading
+App --> Log : Logs processing progress
+Processor --> DB : Saves processed results
+Processor --> Queue : Sends status updates
+@enduml
