@@ -1,0 +1,20 @@
+@startuml
+!define RECTANGLE_RECT rectangle
+!define RECTANGLE_NODE node
+!define RECTANGLE_DATABASE database
+
+title C4 Context Diagram - Data Processing Application
+
+actor User as u
+RECTANGLE_RECT ".NET Console Application" as App
+RECTANGLE_RECT "CSV File Reader" as Reader
+RECTANGLE_RECT "Data Processor" as Processor
+RECTANGLE_RECT "Logger" as Log
+RECTANGLE_DATABASE "Database" as DB
+
+u --> App : Starts
+App --> Reader : Reads data from CSV file
+App --> Processor : Processes data in blocks\nusing multithreading
+App --> Log : Logs processing progress
+Processor --> DB : Saves results
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+class CsvProcessingService {
+    - string _csvFilePath
+    - DataRepository _repository
+    + CsvProcessingService(string csvFilePath, DataRepository repository)
+    + Task ProcessCsvAsync()
+    - Task ProcessBatchAsync(List<CsvRecord> records)
+    - void ProcessRecord(CsvRecord record)
+}
+
+class DataRepository {
+    - string _connectionString
+    + DataRepository(IConfiguration configuration)
+    + Task InsertRecord(int id, string name, int age, string email, string code, bool isValidEmail)
+}
+
+class CsvRecord {
+    + int Id
+    + string Name
+    + int Age
+    + string Email
+}
+
+class EmailValidator {
+    + static bool Validate(string email)
+}
+
+CsvProcessingService --> DataRepository : uses
+CsvProcessingService --> CsvRecord : processes
+CsvProcessingService --> EmailValidator : validates email
+DataRepository --> PostgreSQLDatabase : saves records
+@enduml

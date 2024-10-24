@@ -1,0 +1,77 @@
+@startuml
+!define RECTANGLE_RECT rectangle
+!define RECTANGLE_DATABASE database
+!define RECTANGLE_COMPONENT component
+
+title C4 Component Diagram - Detailed CSV Processing Workflow
+
+actor User as u
+
+package "CsvProcessor Application" {
+    
+    RECTANGLE_COMPONENT "CsvProcessingService" as CsvService {
+        RECTANGLE_RECT "ProcessCsvAsync()" as CsvProcess
+        RECTANGLE_RECT "ProcessBatchAsync()" as BatchProcess
+        RECTANGLE_RECT "ProcessRecord()" as RecordProcess
+    }
+
+    RECTANGLE_COMPONENT "EmailValidator" as Validator {
+        RECTANGLE_RECT "Validate()" as ValidateEmail
+    }
+    
+    RECTANGLE_COMPONENT "DataRepository" as Repository {
+        RECTANGLE_RECT "InsertRecord()" as InsertRecord
+    }
+    
+    RECTANGLE_DATABASE "PostgreSQL Database" as DB
+    RECTANGLE_COMPONENT "CsvHelper Library" as CsvHelper
+    RECTANGLE_COMPONENT "NLog Library" as NLog
+    RECTANGLE_COMPONENT "StreamReader" as StreamReader
+}
+
+u --> CsvService : Starts processing
+
+CsvService --> CsvProcess : Calls to process CSV file
+CsvProcess --> StreamReader : Opens and reads CSV file
+CsvProcess --> CsvHelper : Uses CsvHelper to parse data
+
+CsvProcess --> BatchProcess : Passes records in batches of 1000
+BatchProcess --> RecordProcess : Processes each record in parallel
+
+RecordProcess --> ValidateEmail : Calls for email validation
+Validator --> NLog : Logs validation status
+
+RecordProcess --> InsertRecord : Inserts valid records into the database
+InsertRecord --> DB : Executes SQL INSERT commands
+
+CsvService --> NLog : Logs progress and batch completion
+RecordProcess --> NLog : Logs individual record processing status
+
+note right of CsvProcess
+- Reads CSV data using StreamReader
+- Parses records into CsvRecord objects with CsvHelper
+end note
+
+note right of BatchProcess
+- Divides data into batches of 1000 records
+- Processes each batch in parallel to improve performance
+end note
+
+note right of RecordProcess
+- Validates email using EmailValidator
+- Creates a unique code for each record
+- Calls DataRepository to save records
+end note
+
+note bottom of InsertRecord
+- Executes SQL statements to save data
+- Connects to PostgreSQL Database using Npgsql
+end note
+
+note bottom of DB
+Stores:
+ - Id, Name, Age, Email
+ - Generated Code, Valid Email Status
+end note
+
+@enduml
